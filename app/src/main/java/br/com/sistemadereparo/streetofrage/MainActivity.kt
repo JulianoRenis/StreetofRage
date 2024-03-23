@@ -5,12 +5,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.MotionEvent
 import android.widget.ImageView
-import android.widget.RelativeLayout
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import br.com.sistemadereparo.streetofrage.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -24,13 +20,14 @@ class MainActivity : AppCompatActivity() {
     private var currentIndex = 0
     private val handler = Handler()
     private var deltaX: Int = 0
+    private  var andando = false
 
     private var moveHandler: Handler? = null
 
     private val moveRunnable = object : Runnable {
         override fun run() {
             // Move o personagem continuamente
-            moveCharacter(deltaX)
+            movePersonagem(deltaX)
             moveHandler?.postDelayed(this, 75) // Repete a cada 100 milissegundos
         }
     }
@@ -38,28 +35,35 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         imageView = binding.imgAdam
-        startAnimation()
 
+       verificarSePersonagemEstaParado()
         binding.btnLeft.setOnTouchListener { view, motionEvent ->
-
+            handler.removeCallbacksAndMessages(null)
             when (motionEvent.action) {
-                MotionEvent.ACTION_DOWN -> moveCharacterContinuously(-5) // Quando o botão é pressionado
-                MotionEvent.ACTION_UP -> stopMovingCharacter() // Quando o botão é solto
+                MotionEvent.ACTION_DOWN -> movePersonagemContinuamente(-8) // Quando o botão é pressionado
+                MotionEvent.ACTION_UP -> paraMovimentoDoPersonagem() // Quando o botão é solto
             }
-            true
+            andando
         }
 
         binding.btnRight.setOnTouchListener { view, motionEvent ->
+            handler.removeCallbacksAndMessages(null)
 
             when (motionEvent.action) {
-                MotionEvent.ACTION_DOWN -> moveCharacterContinuously(5) // Quando o botão é pressionado
-                MotionEvent.ACTION_UP -> stopMovingCharacter() // Quando o botão é solto
+                MotionEvent.ACTION_DOWN -> movePersonagemContinuamente(8) // Quando o botão é pressionado
+                MotionEvent.ACTION_UP -> paraMovimentoDoPersonagem() // Quando o botão é solto
             }
-            true
+            andando
         }
     }
 
-    private fun startAnimation() {
+    private fun verificarSePersonagemEstaParado() {
+        if (andando==false){
+            iniciaAnimacaoPersonagemGingando()
+        }    }
+
+
+    private fun iniciaAnimacaoPersonagemGingando() {
         imageView.setImageResource(images[currentIndex])
 
         // Incrementa o índice para a próxima imagem
@@ -67,26 +71,33 @@ class MainActivity : AppCompatActivity() {
 
         // Aguarda 500 milissegundos antes de exibir a próxima imagem
         handler.postDelayed({
-            startAnimation()
+            iniciaAnimacaoPersonagemGingando()
         }, 250)
     }
 
-    private fun moveCharacterContinuously(deltaX: Int) {
-        // Inicia o movimento contínuo se ainda não estiver em andamento
+    private fun movePersonagemContinuamente(deltaX: Int) {
         if (moveHandler == null) {
-            moveHandler = Handler()
+            imageView.setImageResource(R.drawable.anim_andando) // Inicia a nova animação
+            val animationDrawable = imageView.drawable as AnimationDrawable
+            animationDrawable.start()
             this.deltaX = deltaX // Define a direção do movimento
+            moveHandler = Handler()
             moveHandler?.postDelayed(moveRunnable, 0)
         }
     }
 
-    private fun stopMovingCharacter() {
+    private fun paraMovimentoDoPersonagem() {
         // Para o movimento contínuo se estiver em andamento
         moveHandler?.removeCallbacks(moveRunnable)
         moveHandler = null
+        imageView.setImageResource(R.drawable.adam_zero) // Define a imagem parada do personagem
+        // Pare a animação de caminhada, se estiver em andamento
+        (imageView.drawable as? AnimationDrawable)?.stop()
+
+        verificarSePersonagemEstaParado()
     }
 
-    private fun moveCharacter(deltaX: Int) {
+    private fun movePersonagem(deltaX: Int) {
         val layoutParams = imageView.layoutParams as ConstraintLayout.LayoutParams
         layoutParams.leftMargin += deltaX // Altera a margem esquerda do ImageView
         imageView.layoutParams = layoutParams
