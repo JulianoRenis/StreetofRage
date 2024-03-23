@@ -40,4 +40,23 @@
             app:layout_constraintStart_toStartOf="parent"
             app:srcCompat="@drawable/adam_one" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <Button
+        android:id="@+id/btnLeft"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="55dp"
+        android:text="L"
+        app:layout_constraintStart_toStartOf="@+id/backStage"
+        app:layout_constraintTop_toBottomOf="@+id/backStage" />
+
+    <Button
+        android:id="@+id/btnRight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="R"
+        app:layout_constraintStart_toEndOf="@+id/btnLeft"
+        app:layout_constraintTop_toTopOf="@+id/btnLeft" />
 </androidx.constraintlayout.widget.ConstraintLayout>
